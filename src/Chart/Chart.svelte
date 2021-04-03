@@ -1,35 +1,37 @@
 <script lang="ts">
-  import { range, max, extent } from 'd3-array';
+  import { extent } from 'd3-array';
   import { forceSimulation, forceLink, forceManyBody, forceCollide, forceX, forceY} from 'd3-force'
-  import { scaleLinear, scaleSqrt, scaleSequential } from 'd3-scale';
-import { xlink_attr } from 'svelte/internal';
+  import { scaleSqrt, scaleSequential } from 'd3-scale';
+
   import type {Nodes, Links} from '../types'
-import Force from './Force.svelte';
 
     export let nodes: Nodes[];
     export let links: Links[];
-
+let forces = []
   const move = (x: number, y: number) => `transform: translate(${x}px, ${y}px)`
 //let width, height
+let width, height;
+// let width = 1200
+//   $: height = width
+let usedForceNames = []
+let centerPosition = [200, 200]
 
-let width = 1200
-  $: height = width
-  $: console.log(`${height}`)
 let renderedNodes = []
 let membersAccessor = (d: Nodes) => d.members
 let innovAccessor = (d: Nodes) => d.innov
+let teamAccessor = (d: Nodes) => d.team
 
 let membersExtent = extent(nodes, membersAccessor)
 let innovationExtent = extent(nodes, innovAccessor)
 
-$: rScale = scaleSqrt()
+let rScale = scaleSqrt()
 .domain(membersExtent as [number, number])
 .range([0, 100])
 
 
-$: colorScale = scaleSequential(["#edf5ff", "#001d6c"])
+let colorScale = scaleSequential(["#edf5ff", "#001d6c"])
 .domain(innovationExtent as [number, number])
-console.log(colorScale.domain())
+
 $: simulation = forceSimulation()
     .nodes(nodes)
     //   .force("link", forceLink(links).id((d: Nodes) => d.team))
@@ -41,12 +43,12 @@ $: simulation = forceSimulation()
           renderedNodes = [...nodes]
       })
 
-$: activeForceX = forceX()
-$: activeForceY = forceY()
-$: activeForceCollide = forceCollide((d: Nodes) => rScale(membersAccessor(d)))
-    .iterations(3)
+      $: activeForceX = forceX().x(centerPosition[0])
+  $: activeForceY = forceY().y(centerPosition[1])
+$: activeForceCollide = forceCollide((d: any) => rScale(membersAccessor(d)))
+    .iterations(5)
 $: activeLink = forceLink(links)    
-    .id((d: Nodes) => d.team)
+    .id((d: any) => teamAccessor(d) as number)
 
 
 $: forces = [
@@ -54,7 +56,7 @@ $: forces = [
     ["y", activeForceY],
     ['collide', activeForceCollide],
     ['link', activeLink],
-    ['charge', forceManyBody()]
+    ['charge', forceManyBody()].filter(d => d)
 ]
 
 $: console.log(`${forces}`)
@@ -77,29 +79,20 @@ let oldFoceNames = usedForceNames.filter(
 usedForceNames = newForceNames
 
 // kick our simulation into high gear
-simulation.alpha(1)
-simulation.restart()
-
-let x = 0;
-	let y = 0;
-
-	function yPlusAValue(value) {
-		return value + y;
-	}
-
-	$: total = yPlusAValue(x);
+// simulation.alpha(1)
+// simulation.restart()
 
 </script>
 
+
 <div class="wrapper" bind:offsetWidth={width} bind:offsetHeight={height}>
-    <p>All Teams</p>
-    Total: {total}
-<button on:click={() => x++}>
-	Increment X
-</button>
-    <svg width="100%" height="100%">
-        {#each renderedNodes as {x, y}, d}
-        <circle style="{move(x,y)}" r="{rScale(membersAccessor(d))}"></circle>
+
+    <!-- <figure class="c" bind:clientWidth="{width}"> -->
+        <svg width="{width}" height="{height}">
+    <!-- <svg width="100%" height="100%"> -->
+        {#each nodes as d}
+        {console.log(d)}
+        <circle x="{d.x}" y="{d.y}" r="{rScale(membersAccessor(d))}"></circle>
         {/each}
     </svg>
 </div>

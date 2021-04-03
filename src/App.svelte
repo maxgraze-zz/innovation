@@ -5,7 +5,6 @@
 	import type {Links, Nodes} from './types'
 	import Chart from './Chart/Chart.svelte'
 	//import {capitzalizeName} from './utils.svelte'
-
 let links: any;
 let nodes: any;
 	async function loadLinks (): Promise<Array<Links>> {
@@ -33,7 +32,7 @@ loadNodes()
 
 <div class="wrapper">
 	<div class="header">
-	  <h1>Visualizing IBM Collaboration</h1>
+	  <h1>Team Innovation</h1>
 	</div>
 	<div id="visual">
 	  {#if links && nodes}
@@ -47,17 +46,15 @@ loadNodes()
 	  width: 95%;
 	  height: 100%;
 	  margin: 0 auto;
+	  font-family: "Fira code", monospace;
 	}
 	.header {
 	  width: 100%;
 	  margin: 1.5rem 0;
-	  color: 'blue';
 	}
 	.header h1 {
-	  font-family: 'IBM Plex Mono';
-	  font-weight: normal;
+	  font-family: 'Myria';
 	  font-size: calc(3rem + 7px);
-	  /* text-align: center; */
 	}
 	#visual {
 	  position: relative;
