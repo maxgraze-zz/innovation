@@ -42,6 +42,17 @@
 	let strokeWidth = 1;
 	const { register, deregister, invalidate } = getContext("canvas");
 
+	function update() {
+		if (!ctx) return;
+		ctx.clearRect(-width / 2, -height / 2, width, height);
+		drawFunctions.forEach((fn) => {
+			ctx.save();
+			fn(ctx);
+			ctx.restore();
+		});
+		pendingInvalidation = false;
+	}
+
 	function simulationUpdate(ctx) {
 		//ctx.save();
 		//ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
@@ -73,6 +84,7 @@
 	function draw(ctx) {
 		ctx.translate(transform.x, transform.y);
 		ctx.scale(transform.k, transform.k);
+		update();
 		if (nodes) {
 			nodes.forEach((d) => {
 				ctx.fillStyle = colorScale(innovAccessor(d));
