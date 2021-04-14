@@ -1,8 +1,10 @@
 <script>
-	import { getContext, onMount, onDestroy, afterUpdate } from "svelte";
+	import { getContext, onMount, onDestroy, afterUpdate, tick } from "svelte";
 	import { tweened } from "svelte/motion";
 	import { cubicOut } from "svelte/easing";
 	import { scaleSqrt, scaleSequential } from "d3-scale";
+	import { zoom, zoomIdentity } from "d3-zoom";
+
 	import { extent } from "d3-array";
 	import {
 		forceSimulation,
@@ -13,12 +15,15 @@
 		forceY,
 	} from "d3-force";
 
+	//import { update } from "./Canvas.svelte";
 	export let nodes;
 	export let links;
 	export let parentWidth = 0;
 	export let parentHeight = 0;
 
-	let simulation;
+	let simulation, ctx;
+	let transform = zoomIdentity;
+
 	let renderedNodes = [];
 	let membersAccessor = (d) => d.members;
 	let innovAccessor = (d) => d.innov;
@@ -37,10 +42,39 @@
 	let strokeWidth = 1;
 	const { register, deregister, invalidate } = getContext("canvas");
 
+	function simulationUpdate(ctx) {
+		//ctx.save();
+		//ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+		//ctx.translate(transform.x, transform.y);
+		//ctx.scale(transform.k, transform.k);
+		links.forEach((d) => {
+			ctx.beginPath();
+			ctx.moveTo(d.source.x, d.source.y);
+			ctx.lineTo(d.target.x, d.target.y);
+			ctx.globalAlpha = 0.6;
+			ctx.strokeStyle = "#999";
+			ctx.lineWidth = 0;
+			//ctx.stroke();
+			ctx.globalAlpha = 1;
+		});
+
+		nodes.forEach((d, i) => {
+			ctx.beginPath();
+			ctx.arc(d.x, d.y, rScale(membersAccessor(d)), 0, 2 * Math.PI);
+			ctx.strokeStyle = "#fff";
+			ctx.lineWidth = 1.5;
+			ctx.stroke();
+			ctx.fillStyle = colorScale(innovAccessor(d));
+			ctx.fill();
+		});
+		ctx.restore();
+	}
+
 	function draw(ctx) {
+		ctx.translate(transform.x, transform.y);
+		ctx.scale(transform.k, transform.k);
 		if (nodes) {
 			nodes.forEach((d) => {
-				ctx.globalAlpha = opacity;
 				ctx.fillStyle = colorScale(innovAccessor(d));
 				if (strokeColor) ctx.strokeStyle = strokeColor;
 				ctx.lineWidth = strokeWidth;
@@ -56,7 +90,7 @@
 					ctx.moveTo(d.source.x, d.source.y);
 					ctx.lineTo(d.target.x, d.target.y);
 					ctx.globalAlpha = 0.6;
-					//ctx.strokeStyle = strok;
+					ctx.strokeStyle = strokeWidth;
 					ctx.lineWidth = 0;
 					//ctx.stroke();
 				});

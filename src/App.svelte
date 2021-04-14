@@ -41,7 +41,8 @@
 	</div>
 	<div id="visual">
 		{#if links && nodes}
-			<Visualization {links} {nodes} />
+			<!-- <Visualization {links} {nodes} /> -->
+			<ForceWrapper {links} {nodes} />
 		{/if}
 	</div>
 </div>

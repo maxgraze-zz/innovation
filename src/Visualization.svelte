@@ -16,3 +16,16 @@
 		</Canvas>
 	</div>
 </div>
+
+<style>
+	.visualization-wrapper {
+		width: 100%;
+		height: 100%;
+	}
+	.draw-wrapper {
+		position: relative;
+		width: 100%;
+		height: 100%;
+		overflow: hidden;
+	}
+</style>

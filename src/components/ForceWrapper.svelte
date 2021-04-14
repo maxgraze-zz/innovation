@@ -18,8 +18,7 @@
 
 	export let nodes;
 	export let links;
-
-	let newD = Object.assign(nodes, links);
+	assign(nodes, links);
 	console.log(newD);
 	let renderedNodes = [];
 	let membersAccessor = (d) => d.members;
